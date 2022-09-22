@@ -1,29 +1,81 @@
 {{template "base" .}}
 
 {{define "content"}}
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <img src="static/generals-quarters.png" alt="room image"
-                    class="img-fluid mx-auto d-block img-thumbnail room-image">
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Check availability</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <h1 class="text-center mt-4">General's Quarters</h1>
-                <p>Your home away from on the shores of the east coast</p>
-                <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet magni laborum necessitatibus facilis
-                    voluptatibus repellendus neque dolores animi ex, accusamus, doloremque fugit tempora consequatur
-                    dicta earum dolorum officiis doloribus dolor? Lorem ipsum dolor sit amet consectetur adipisicing
-                    elit. At eum ipsa deleniti repudiandae minus doloribus voluptatem modi eos saepe laboriosam
-                    consectetur cumque veritatis alias, earum nisi ut quis! Nulla, adipisci. Lorem ipsum dolor sit amet
-                    consectetur adipisicing elit. Autem minima distinctio accusantium atque consequuntur debitis odit
-                    iure eaque laborum architecto. Dicta provident inventore asperiores. Dolor, iusto autem. Cum, eos
-                    harum?
-                </p>
+            <div class="modal-body">
+                <form action="/search-availability" method="POST" id ="main-form" class="needs-validation" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="row" id="reservation-dates">
+                        <div class="col">
+                            <input required type="text" class="form-control" name="start" placeholder="Arrival date"
+                                autocomplete="off">
+                        </div>
+                        <div class="col">
+                            <input required type="text" class="form-control" name="end" placeholder="Departure date"
+                                autocomplete="off">
+                        </div>
+                    </div>
+                    <hr>
+                    <button id="initiator" type="submit" class="btn btn-primary">Search availability</button>
+                </form>
             </div>
+
         </div>
-        <a name="makeReservation" id="makeReservation" class="btn btn-primary" href="#" role="button">Make Reservation</a>
     </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <img src="static/generals-quarters.png" alt="room image"
+                class="img-fluid mx-auto d-block img-thumbnail room-image">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h1 class="text-center mt-4">General's Quarters</h1>
+            <p>Your home away from on the shores of the east coast</p>
+            <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet magni laborum necessitatibus facilis
+                voluptatibus repellendus neque dolores animi ex, accusamus, doloremque fugit tempora consequatur
+                dicta earum dolorum officiis doloribus dolor? Lorem ipsum dolor sit amet consectetur adipisicing
+                elit. At eum ipsa deleniti repudiandae minus doloribus voluptatem modi eos saepe laboriosam
+                consectetur cumque veritatis alias, earum nisi ut quis! Nulla, adipisci. Lorem ipsum dolor sit amet
+                consectetur adipisicing elit. Autem minima distinctio accusantium atque consequuntur debitis odit
+                iure eaque laborum architecto. Dicta provident inventore asperiores. Dolor, iusto autem. Cum, eos
+                harum?
+            </p>
+        </div>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Check availability
+    </button>
+</div>
+{{end}}
+
+{{define "js"}}
+<script>
+
+    let initiator = document.getElementById('initiator');
+    initiator.addEventListener('click', function (e) {
+        e.preventDefault();
+        let form = document.getElementById('main-form');
+        let formData = new FormData(form);
+        formData.append('csrf_token', '{{.CSRFToken}}');
+        fetch('/search-availability-json', {
+            method: 'post',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => console.log(data));
+    })
+</script>
+
 {{end}}
