@@ -1,0 +1,21 @@
+html{
+    min-width: 100%;
+    min-height: 100%;
+}
+
+.my-footer {
+    padding: 1em;
+    height: 5em;
+    background-color: #3d3d3d;
+    margin-top: 1.5em;
+    color: #ffffff;
+    font-size: 80%;
+}
+
+.room-image {
+    width: 50%;
+}
+
+.redText {
+    color: red;
+}
