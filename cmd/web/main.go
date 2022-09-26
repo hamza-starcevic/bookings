@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/hamza-starcevic/bookings/driver"
 	"github.com/hamza-starcevic/bookings/pkg/config"
 	handler "github.com/hamza-starcevic/bookings/pkg/handlers"
 	"github.com/hamza-starcevic/bookings/pkg/models"
@@ -20,10 +21,15 @@ const portNumber = ":8080"
 var app config.AppConfig
 var session *scs.SessionManager
 
-// main is the main application function
+// * Main is the main application function
 func main() {
+
 	//*What I am going to put in the session
 	gob.Register(models.Reservation{})
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
+
 	//* Setting up session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
@@ -32,6 +38,16 @@ func main() {
 	session.Cookie.Secure = false
 
 	app.Session = session
+
+	//! Connect	to database
+	log.Println("Connecting to database...")
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings user=hstarcevic password=Kenansin@2002")
+	if err != nil {
+		log.Fatal("Cannot connect to database! Dying...")
+	}
+
+	defer db.SQL.Close()
+
 	//* Storing session in app config
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
@@ -43,7 +59,7 @@ func main() {
 	app.UseCache = true
 
 	//* Storing session in app config
-	repo := handler.NewRepo(&app)
+	repo := handler.NewRepo(&app, db)
 	handler.NewHandlers(repo)
 
 	render.NewTemplates(&app)

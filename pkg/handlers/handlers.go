@@ -4,11 +4,16 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
+	"github.com/hamza-starcevic/bookings/driver"
 	"github.com/hamza-starcevic/bookings/pkg/config"
 	"github.com/hamza-starcevic/bookings/pkg/forms"
 	"github.com/hamza-starcevic/bookings/pkg/models"
 	render "github.com/hamza-starcevic/bookings/pkg/renderers"
+	"github.com/hamza-starcevic/bookings/pkg/repository"
+	"github.com/hamza-starcevic/bookings/pkg/repository/dbrepo"
 )
 
 // * Repo the repository used by the handlers
@@ -17,12 +22,14 @@ var Repo *Repository
 // * Repository is the repository type
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
 // * NewRepo creates a new repository
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(db.SQL, a),
 	}
 }
 
@@ -41,14 +48,15 @@ func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
 
 // * About is the about page handler
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	//*perform some logic
+
+	//* Perform some logic
 	stringMap := make(map[string]string)
 	stringMap["test"] = "Hello, again."
 
 	remoteIP := m.App.Session.GetString(r.Context(), "remote_ip")
 	stringMap["remote_ip"] = remoteIP
 
-	//*send data to the template
+	//* Send data to the template
 	render.RenderTemplate(w, r, "about.page.tmpl", &models.Templatedata{
 		StringMap: stringMap,
 	})
@@ -81,11 +89,33 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
+	sd := r.Form.Get("start_date")
+	ed := r.Form.Get("end_date")
+
+	layout := "2006-01-02"
+
+	startDate, err := time.Parse(layout, sd)
+	if err != nil {
+		log.Println(err)
+	}
+	endDate, err := time.Parse(layout, ed)
+	if err != nil {
+		log.Println(err)
+	}
+	soba := r.Form.Get("room_id")
+	roomID, err := strconv.Atoi(soba)
+	if err != nil {
+		log.Println(err)
+	}
+
 	reservation := models.Reservation{
 		FirstName: r.Form.Get("first_name"),
 		LastName:  r.Form.Get("last_name"),
 		Email:     r.Form.Get("email"),
 		Phone:     r.Form.Get("phone"),
+		RoomID:    roomID,
+		StartDate: startDate,
+		EndDate:   endDate,
 	}
 
 	form := forms.New(r.PostForm)
@@ -103,6 +133,24 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 			Data: data,
 		})
 		return
+	}
+
+	newReservationID, err := m.DB.InsertReservation(reservation)
+	if err != nil {
+		log.Println(err)
+	}
+
+	restriction := models.RoomRestriction{
+		StartDate:     startDate,
+		EndDate:       endDate,
+		RoomID:        roomID,
+		ReservationID: newReservationID,
+		RestrictionID: 1,
+	}
+
+	err = m.DB.InsertRoomRestriction(restriction)
+	if err != nil {
+		log.Println(err)
 	}
 
 	m.App.Session.Put(r.Context(), "reservation", reservation)
