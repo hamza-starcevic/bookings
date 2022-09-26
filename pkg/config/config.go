@@ -3,7 +3,6 @@ package config
 import (
 	"html/template"
 	"log"
-
 	"github.com/alexedwards/scs/v2"
 )
 

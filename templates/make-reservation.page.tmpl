@@ -1,42 +1,87 @@
 {{template "base" .}}
 
 {{define "content"}}
-    <div class="container">
-        <div class="row">
+<div class="container">
+  <div class="row"></div>
+  <div class="row">
+    <div class="col">
+      <h1>Make reservation</h1>
 
+      {{$res := index .Data "reservation"}}
+      <form action="/make-reservation" method="POST" class="" novalidate>
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+        <div class="mb-3">
+          <label for="first_name" class="form-label">First name</label>
+          {{with .Form.Errors.Get "first_name"}}
+          <label for="" class="text-danger">{{.}}</label>
+          {{ end }}
+          <input required type="text" name="first_name" id="first_name"
+          class="form-control {{with .Form.Errors.Get "first_name"}} is-invalid
+          {{ end }}" placeholder="" value="{{ $res.FirstName }}"
+          aria-describedby="helpId" />
         </div>
-        <div class="row">
-            <div class="col">
-                <h1>Make reservation</h1>
-
-                <form action="post" class="needs-validation" novalidate>
-                    <div class="mb-3">
-                        <label for="first_name" class="form-label">First name</label>
-                        <input required type="text" name="first_name" id="first_name" class="form-control" placeholder=""
-                            aria-describedby="helpId">
-                    </div>
-                    <div class="mb-3">
-                        <label for="last_name" class="form-label">Last name</label>
-                        <input required type="text" name="last_name" id="last_name" class="form-control" placeholder=""
-                            aria-describedby="helpId">
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input required type="email" name="email" id="email" class="form-control" placeholder=""
-                            aria-describedby="helpId">
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone</label>
-                        <input required type="text" name="phone" id="phone" class="form-control" placeholder=""
-                            aria-describedby="helpId">
-                    </div>
-
-                    <hr>
-
-                    <input required type="submit" class="btn btn-primary" value="Make Reservation">
-                </form>
-            </div>
-
+        <div class="mb-3">
+          <label for="last_name" class="form-label">Last name</label>
+          {{with .Form.Errors.Get "last_name"}}
+          <label for="" class="text-danger">{{.}}</label>
+          {{ end }}
+          <input
+            required
+            type="text"
+            name="last_name"
+            value="{{ $res.LastName }}"
+            id="last_name"
+            class="form-control {{with .Form.Errors.Get "last_name"}} is-invalid
+            {{ end }}"
+            placeholder=""
+            aria-describedby="helpId"
+          />
         </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          {{with .Form.Errors.Get "email"}}
+          <label for="" class="text-danger">{{.}}</label>
+          {{ end }}
+          <input
+            required
+            type="email"
+            name="email"
+            value="{{ $res.Email }}"
+            id="email"
+            class="form-control {{with .Form.Errors.Get "email"}} is-invalid
+            {{ end }}"
+            placeholder=""
+            aria-describedby="helpId"
+          />
+        </div>
+        <div class="mb-3">
+            {{with .Form.Errors.Get "phone"}}
+          <label for="" class="text-danger">{{.}}</label>
+          {{ end }}
+          <label for="phone" class="form-label">Phone</label>
+          <input
+            required
+            type="text"
+            name="phone"
+            id="phone"
+            value="{{ $res.Phone }}"
+            class="form-control {{with .Form.Errors.Get "phone"}} is-invalid
+            {{ end }}"
+            placeholder=""
+            aria-describedby="helpId"
+          />
+        </div>
+
+        <hr />
+
+        <input
+          required
+          type="submit"
+          class="btn btn-primary"
+          value="Make Reservation"
+        />
+      </form>
     </div>
-{{end}}
+  </div>
+</div>
+{{ end }}

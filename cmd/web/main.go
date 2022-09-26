@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/hamza-starcevic/bookings/pkg/config"
 	handler "github.com/hamza-starcevic/bookings/pkg/handlers"
+	"github.com/hamza-starcevic/bookings/pkg/models"
 	render "github.com/hamza-starcevic/bookings/pkg/renderers"
 )
 
@@ -20,6 +22,8 @@ var session *scs.SessionManager
 
 // main is the main application function
 func main() {
+	//*What I am going to put in the session
+	gob.Register(models.Reservation{})
 	//* Setting up session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour

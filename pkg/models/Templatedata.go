@@ -1,5 +1,7 @@
 package models
 
+import "github.com/hamza-starcevic/bookings/pkg/forms"
+
 // * Templatedata holds data sent from handlers to templates
 type Templatedata struct {
 	StringMap map[string]string
@@ -10,4 +12,5 @@ type Templatedata struct {
 	Flash     string
 	Warning   string
 	Error     string
+	Form      *forms.Form
 }
